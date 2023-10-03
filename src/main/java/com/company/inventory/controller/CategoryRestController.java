@@ -3,6 +3,7 @@ package com.company.inventory.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -16,11 +17,25 @@ public class CategoryRestController {
 	@Autowired
 	private ICategoryServices categoryServices;
 	
+	/**
+	 * Get Categories
+	 * 
+	 * @return
+	 */
 	@GetMapping("/categories")
 	public ResponseEntity<CategoryResponseRest> searchCategories(){
 		return categoryServices.search();
 	}
 	
-	
+	/**
+	 * Get Category by Id 
+	 * 
+	 * @param id
+	 * @return
+	 */
+	@GetMapping("/categories/{id}")
+	public ResponseEntity<CategoryResponseRest> searchCategoryById(@PathVariable Long id){
+		return categoryServices.searchById(id);
+	}
 
 }
