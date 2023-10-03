@@ -56,7 +56,7 @@ public class CategoryServices implements ICategoryServices {
 				return new ResponseEntity<CategoryResponseRest>(response, HttpStatus.NOT_FOUND);
 			}
 		} catch (Exception e) {
-			response.setMetadata("Respuesta Fail", "-1", "Error al Consultar ");
+			response.setMetadata("Respuesta Fail", "-1", "Error al Consultar por ID");
 			e.getStackTrace();
 			return new ResponseEntity<CategoryResponseRest>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
@@ -79,6 +79,43 @@ public class CategoryServices implements ICategoryServices {
 				response.setMetadata("Respuesta Fail", "-1", "Error al guardar la categoria.");
 				return new ResponseEntity<CategoryResponseRest>(response, HttpStatus.BAD_REQUEST);
 			}
+		} catch (Exception e) {
+			response.setMetadata("Respuesta Fail", "-1", "Error al guardar la categoria ");
+			e.getStackTrace();
+			return new ResponseEntity<CategoryResponseRest>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+		return new ResponseEntity<CategoryResponseRest>(response, HttpStatus.OK);
+	}
+
+	@Override
+	@Transactional
+	public ResponseEntity<CategoryResponseRest> update(Category category, Long id) {
+		CategoryResponseRest response = new CategoryResponseRest();
+		List<Category> list = new ArrayList<>();
+
+		try {
+			Optional<Category> categorySearch = categoryDao.findById(id);
+
+			if (categorySearch.isPresent()) {
+
+				categorySearch.get().setName(category.getName());
+				categorySearch.get().setDescription(category.getDescription());
+
+				Category categoryUpdate = categoryDao.save(categorySearch.get());
+
+				if (categoryUpdate != null) {
+					list.add(categoryUpdate);
+					response.getCategoryResponse().setCategory(list);
+					response.setMetadata("Respuesta Ok", "200", "La categoria se ha actualizado exitosamente");
+				} else {
+					response.setMetadata("Respuesta Fail", "-1", "Error al actualizar la categoria");
+					return new ResponseEntity<CategoryResponseRest>(response, HttpStatus.NOT_FOUND);
+				}
+			} else {
+				response.setMetadata("Respuesta Fail", "-1", "Error al actualizar la categoria.");
+				return new ResponseEntity<CategoryResponseRest>(response, HttpStatus.NOT_FOUND);
+			}
+
 		} catch (Exception e) {
 			response.setMetadata("Respuesta Fail", "-1", "Error al Consultar ");
 			e.getStackTrace();
