@@ -124,4 +124,28 @@ public class CategoryServices implements ICategoryServices {
 		return new ResponseEntity<CategoryResponseRest>(response, HttpStatus.OK);
 	}
 
+	@Override
+	@Transactional
+	public ResponseEntity<CategoryResponseRest> deleteById(Long id) {
+		CategoryResponseRest response = new CategoryResponseRest();
+
+		try {
+			Optional<Category> categorySearch = categoryDao.findById(id);
+
+			if (categorySearch.isPresent()) {
+				categoryDao.deleteById(id);
+				response.setMetadata("Respuesta Ok", "200", "La categoria se ha eliminado exitosamente");
+			} else {
+				response.setMetadata("Respuesta Fail", "-1", "Error al borrar la categoria");
+				return new ResponseEntity<CategoryResponseRest>(response, HttpStatus.NOT_FOUND);
+			}
+		} catch (Exception e) {
+			response.setMetadata("Respuesta Fail", "-1", "Error al Borarr ");
+			e.getStackTrace();
+			return new ResponseEntity<CategoryResponseRest>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+
+		return new ResponseEntity<CategoryResponseRest>(response, HttpStatus.OK);
+	}
+
 }
