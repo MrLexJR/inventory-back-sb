@@ -17,4 +17,5 @@ public interface ICategoryServices {
 
 	public ResponseEntity<CategoryResponseRest> deleteById(Long id);
 
+	public ResponseEntity<CategoryResponseRest> searchData(String query);
 }

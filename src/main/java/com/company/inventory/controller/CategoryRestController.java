@@ -10,13 +10,14 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.company.inventory.model.Category;
 import com.company.inventory.response.CategoryResponseRest;
 import com.company.inventory.services.ICategoryServices;
 
-@CrossOrigin(origins = {"http://localhost:4200"})
+@CrossOrigin(origins = { "http://localhost:4200" })
 @RestController()
 @RequestMapping("/api/v1")
 public class CategoryRestController {
@@ -64,11 +65,10 @@ public class CategoryRestController {
 	 * @return
 	 */
 	@PutMapping("/categories/{id}")
-	public ResponseEntity<CategoryResponseRest> update(@PathVariable Long id,
-			@RequestBody Category category) {
+	public ResponseEntity<CategoryResponseRest> update(@PathVariable Long id, @RequestBody Category category) {
 		return categoryServices.update(category, id);
 	}
-	
+
 	/**
 	 * Delete Category
 	 * 
@@ -78,5 +78,16 @@ public class CategoryRestController {
 	@DeleteMapping("/categories/{id}")
 	public ResponseEntity<CategoryResponseRest> delet(@PathVariable Long id) {
 		return categoryServices.deleteById(id);
+	}
+
+	/**
+	 * Search Query
+	 * 
+	 * @param query
+	 * @return
+	 */
+	@GetMapping("/categories/search")
+	public ResponseEntity<CategoryResponseRest> searchItems(@RequestParam String query) {
+		return categoryServices.searchData(query);
 	}
 }

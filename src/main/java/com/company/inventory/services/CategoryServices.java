@@ -52,8 +52,8 @@ public class CategoryServices implements ICategoryServices {
 				response.getCategoryResponse().setCategory(list);
 				response.setMetadata("Respuesta Ok", "200", "Respuesta exitosa. Categoria encontradad");
 			} else {
-				response.setMetadata("Respuesta Fail", "-1", "Error al Consultar Categorias por Id");
-				return new ResponseEntity<CategoryResponseRest>(response, HttpStatus.NOT_FOUND);
+				response.setMetadata("Respuesta Ok", "202", "No existe la categoria");
+				return new ResponseEntity<CategoryResponseRest>(response, HttpStatus.OK);
 			}
 		} catch (Exception e) {
 			response.setMetadata("Respuesta Fail", "-1", "Error al Consultar por ID");
@@ -141,6 +141,24 @@ public class CategoryServices implements ICategoryServices {
 			}
 		} catch (Exception e) {
 			response.setMetadata("Respuesta Fail", "-1", "Error al Borarr ");
+			e.getStackTrace();
+			return new ResponseEntity<CategoryResponseRest>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+
+		return new ResponseEntity<CategoryResponseRest>(response, HttpStatus.OK);
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public ResponseEntity<CategoryResponseRest> searchData(String query) {
+		CategoryResponseRest response = new CategoryResponseRest();
+
+		try {
+			List<Category> category = categoryDao.searchByQuery(query);
+			response.getCategoryResponse().setCategory(category);
+			response.setMetadata("Respuesta Ok", "200", "Respuesta exitosa");
+		} catch (Exception e) {
+			response.setMetadata("Respuesta Fail", "-1", "Error al Consultar ");
 			e.getStackTrace();
 			return new ResponseEntity<CategoryResponseRest>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
