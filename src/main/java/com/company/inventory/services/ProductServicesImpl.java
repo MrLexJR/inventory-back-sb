@@ -103,12 +103,12 @@ public class ProductServicesImpl implements IProductServices {
 			// search product by id
 			List<Product> products = productDao.findByNameContainingIgnoreCase(name);
 			if (products.size() > 0) {
-				products.stream().forEach( (prod) -> {
+				products.stream().forEach((prod) -> {
 					byte[] imgDesc = Util.decompressZLib(prod.getPicture());
 					prod.setPicture(imgDesc);
 					list.add(prod);
 				});
-				
+
 				response.getProduct().setProducts(list);
 				response.setMetadata("Respuesta Ok", "200", "Respuesta exitosa. Producto encontrado");
 			} else {
@@ -157,17 +157,18 @@ public class ProductServicesImpl implements IProductServices {
 		List<Product> list = new ArrayList<>();
 
 		try {
-			// search products			
+			// search products
 			List<Product> products = (List<Product>) productDao.findAll();
 			if (products.size() > 0) {
-				products.stream().forEach( (prod) -> {
+				products.stream().forEach((prod) -> {
 					byte[] imgDesc = Util.decompressZLib(prod.getPicture());
 					prod.setPicture(imgDesc);
 					list.add(prod);
 				});
-				
+
 				response.getProduct().setProducts(list);
-				response.setMetadata("Respuesta Ok", "200", "Respuesta exitosa, se encontraron "+products.size()+" productos.");
+				response.setMetadata("Respuesta Ok", "200",
+						"Respuesta exitosa, se encontraron " + products.size() + " productos.");
 			} else {
 				response.setMetadata("Respuesta Ok", "202", "No existen productos");
 				return new ResponseEntity<ProductResponseRest>(response, HttpStatus.NOT_FOUND);
@@ -175,6 +176,56 @@ public class ProductServicesImpl implements IProductServices {
 
 		} catch (Exception e) {
 			response.setMetadata("Respuesta Fail", "-1", "Error al consultar los productos");
+			e.getStackTrace();
+			return new ResponseEntity<ProductResponseRest>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+
+		return new ResponseEntity<ProductResponseRest>(response, HttpStatus.OK);
+	}
+
+	@Override
+	@Transactional
+	public ResponseEntity<ProductResponseRest> update(Product product, Long productId, Long categoryId) {
+		ProductResponseRest response = new ProductResponseRest();
+		List<Product> list = new ArrayList<>();
+
+		try {
+			// search category to set in the product object
+			Optional<Category> category = categoryDao.findById(categoryId);
+			if (category.isPresent()) {
+				product.setCategory(category.get());
+				response.setMetadata("Respuesta Ok", "200", "Respuesta exitosa. Categoria encontradad");
+			} else {
+				response.setMetadata("Respuesta Ok", "202", "No existe el producto");
+				return new ResponseEntity<ProductResponseRest>(response, HttpStatus.NOT_FOUND);
+			}
+
+			Optional<Product> productSearch = productDao.findById(productId);
+
+			if (productSearch.isPresent()) {
+				productSearch.get().setAccount(product.getAccount());
+				productSearch.get().setCategory(category.get());
+				productSearch.get().setName(product.getName());
+				productSearch.get().setPicture(product.getPicture());
+				productSearch.get().setPrice(product.getPrice());
+
+				Product productSave = productDao.save(productSearch.get());
+
+				if (productSave != null) {
+					list.add(productSave);
+					response.getProduct().setProducts(list);
+					response.setMetadata("Respuesta Ok", "200", "El producto se ha actualizo exitosamente");
+				}else {
+					response.setMetadata("Respuesta Fail", "-1", "Error al actualizar el producto.");
+					return new ResponseEntity<ProductResponseRest>(response, HttpStatus.BAD_REQUEST);
+				}
+
+			} else {
+				response.setMetadata("Respuesta Fail", "-1", "Error al actualizar el producto.");
+				return new ResponseEntity<ProductResponseRest>(response, HttpStatus.NOT_FOUND);
+			}
+		} catch (Exception e) {
+			response.setMetadata("Respuesta Fail", "-1", "Error al actualizar el producto ");
 			e.getStackTrace();
 			return new ResponseEntity<ProductResponseRest>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 		}

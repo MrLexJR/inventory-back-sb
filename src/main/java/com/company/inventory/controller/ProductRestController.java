@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -60,7 +61,7 @@ public class ProductRestController {
 	public ResponseEntity<ProductResponseRest> searchProductById(@PathVariable Long id) {
 		return productServices.searchById(id);
 	}
-	
+
 	/**
 	 * Get Product by Names
 	 * 
@@ -71,7 +72,7 @@ public class ProductRestController {
 	public ResponseEntity<ProductResponseRest> searchProductById(@PathVariable String name) {
 		return productServices.searchByName(name);
 	}
-	
+
 	/**
 	 * Delete Product
 	 * 
@@ -82,7 +83,7 @@ public class ProductRestController {
 	public ResponseEntity<ProductResponseRest> delet(@PathVariable Long id) {
 		return productServices.deleteById(id);
 	}
-	
+
 	/**
 	 * Get Products
 	 * 
@@ -93,5 +94,25 @@ public class ProductRestController {
 	public ResponseEntity<ProductResponseRest> searchsProduct() {
 		return productServices.searchProducts();
 	}
-	
+
+	/**
+	 * Update Product
+	 * 
+	 * @param picture
+	 * @param data
+	 * @param categoryId
+	 * @param id
+	 * @return
+	 * @throws IOException
+	 */
+	@PutMapping("/products/{id}")
+	public ResponseEntity<ProductResponseRest> update(@RequestParam("picture") MultipartFile picture,
+			@RequestParam("data") String data, @RequestParam("categoryId") Long categoryId, @PathVariable Long id)
+			throws IOException {
+
+		Product product = this.objectMapper.readValue(data, Product.class);
+		product.setPicture(Util.compressZLib(picture.getBytes()));
+
+		return productServices.update(product, id, categoryId);
+	}
 }
