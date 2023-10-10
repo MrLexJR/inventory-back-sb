@@ -15,7 +15,7 @@ import com.company.inventory.model.Category;
 import com.company.inventory.response.CategoryResponseRest;
 
 @Service
-public class CategoryServices implements ICategoryServices {
+public class CategoryServicesImpl implements ICategoryServices {
 
 	@Autowired
 	private ICategoryDao categoryDao;
