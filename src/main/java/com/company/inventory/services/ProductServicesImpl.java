@@ -14,6 +14,7 @@ import com.company.inventory.dao.IProductDao;
 import com.company.inventory.model.Category;
 import com.company.inventory.model.Product;
 import com.company.inventory.response.ProductResponseRest;
+import com.company.inventory.util.Util;
 
 @Service
 public class ProductServicesImpl implements IProductServices {
@@ -26,7 +27,6 @@ public class ProductServicesImpl implements IProductServices {
 		this.categoryDao = categoryDao;
 		this.productDao = productDao;
 	}
-
 
 	@Override
 	@Transactional
@@ -44,9 +44,9 @@ public class ProductServicesImpl implements IProductServices {
 				response.setMetadata("Respuesta Ok", "202", "No existe la categoria");
 				return new ResponseEntity<ProductResponseRest>(response, HttpStatus.NOT_FOUND);
 			}
-			
+
 			Product productSave = productDao.save(product);
-			
+
 			if (productSave != null && productSave.getId() != null) {
 				list.add(productSave);
 				response.getProduct().setProducts(list);
@@ -57,6 +57,35 @@ public class ProductServicesImpl implements IProductServices {
 			}
 		} catch (Exception e) {
 			response.setMetadata("Respuesta Fail", "-1", "Error al guardar el producto ");
+			e.getStackTrace();
+			return new ResponseEntity<ProductResponseRest>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+
+		return new ResponseEntity<ProductResponseRest>(response, HttpStatus.OK);
+	}
+
+	@Override
+	@Transactional(readOnly = true)
+	public ResponseEntity<ProductResponseRest> searchById(Long productId) {
+		ProductResponseRest response = new ProductResponseRest();
+		List<Product> list = new ArrayList<>();
+
+		try {
+			// search product by id
+			Optional<Product> product = productDao.findById(productId);
+			if (product.isPresent()) {
+				byte[] imgDesc = Util.decompressZLib(product.get().getPicture());
+				product.get().setPicture(imgDesc);
+				list.add(product.get());
+				response.getProduct().setProducts(list);
+				response.setMetadata("Respuesta Ok", "200", "Respuesta exitosa. Producto encontrado");
+			} else {
+				response.setMetadata("Respuesta Ok", "202", "No existe la categoria");
+				return new ResponseEntity<ProductResponseRest>(response, HttpStatus.NOT_FOUND);
+			}
+
+		} catch (Exception e) {
+			response.setMetadata("Respuesta Fail", "-1", "Error al consultar el producto por Id");
 			e.getStackTrace();
 			return new ResponseEntity<ProductResponseRest>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
