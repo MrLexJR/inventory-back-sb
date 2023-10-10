@@ -41,7 +41,7 @@ public class ProductServicesImpl implements IProductServices {
 				product.setCategory(category.get());
 				response.setMetadata("Respuesta Ok", "200", "Respuesta exitosa. Categoria encontradad");
 			} else {
-				response.setMetadata("Respuesta Ok", "202", "No existe la categoria");
+				response.setMetadata("Respuesta Ok", "202", "No existe el producto");
 				return new ResponseEntity<ProductResponseRest>(response, HttpStatus.NOT_FOUND);
 			}
 
@@ -80,7 +80,7 @@ public class ProductServicesImpl implements IProductServices {
 				response.getProduct().setProducts(list);
 				response.setMetadata("Respuesta Ok", "200", "Respuesta exitosa. Producto encontrado");
 			} else {
-				response.setMetadata("Respuesta Ok", "202", "No existe la categoria");
+				response.setMetadata("Respuesta Ok", "202", "No existe el producto");
 				return new ResponseEntity<ProductResponseRest>(response, HttpStatus.NOT_FOUND);
 			}
 
@@ -118,6 +118,31 @@ public class ProductServicesImpl implements IProductServices {
 
 		} catch (Exception e) {
 			response.setMetadata("Respuesta Fail", "-1", "Error al consultar el producto por nombre");
+			e.getStackTrace();
+			return new ResponseEntity<ProductResponseRest>(response, HttpStatus.INTERNAL_SERVER_ERROR);
+		}
+
+		return new ResponseEntity<ProductResponseRest>(response, HttpStatus.OK);
+	}
+
+	@Override
+	@Transactional
+	public ResponseEntity<ProductResponseRest> deleteById(Long productId) {
+		ProductResponseRest response = new ProductResponseRest();
+
+		try {
+			// search product by id
+			Optional<Product> product = productDao.findById(productId);
+			if (product.isPresent()) {
+				productDao.deleteById(productId);
+				response.setMetadata("Respuesta Ok", "200", "El Producto fue eliminado correctamente.");
+			} else {
+				response.setMetadata("Respuesta Ok", "202", "No existe el producto");
+				return new ResponseEntity<ProductResponseRest>(response, HttpStatus.NOT_FOUND);
+			}
+
+		} catch (Exception e) {
+			response.setMetadata("Respuesta Fail", "-1", "Error al borrar el producto por Id");
 			e.getStackTrace();
 			return new ResponseEntity<ProductResponseRest>(response, HttpStatus.INTERNAL_SERVER_ERROR);
 		}
