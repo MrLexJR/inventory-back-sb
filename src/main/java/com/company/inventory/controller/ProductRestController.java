@@ -1,6 +1,8 @@
 package com.company.inventory.controller;
 
 import java.io.IOException;
+import java.util.Date;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -18,8 +20,11 @@ import org.springframework.web.multipart.MultipartFile;
 import com.company.inventory.model.Product;
 import com.company.inventory.response.ProductResponseRest;
 import com.company.inventory.services.IProductServices;
+import com.company.inventory.util.ProductExcelExporter;
 import com.company.inventory.util.Util;
 import com.fasterxml.jackson.databind.ObjectMapper;
+
+import jakarta.servlet.http.HttpServletResponse;
 
 @CrossOrigin(origins = { "http://localhost:4200" })
 @RestController
@@ -114,5 +119,28 @@ public class ProductRestController {
 		product.setPicture(Util.compressZLib(picture.getBytes()));
 
 		return productServices.update(product, id, categoryId);
+	}
+	
+	/**
+	 * Export Excel
+	 *  
+	 * @param response
+	 * @throws IOException
+	 */
+	@GetMapping("/products/export/excel")
+	public void exportToExcel(HttpServletResponse response) throws IOException {
+
+		response.setContentType("application/octet-stream");
+
+		String headerKey = "Content-Disposition";
+		String headerValue = "attachment; filename=result_product_"+new Date().toString()+".xlsx";
+		response.setHeader(headerKey, headerValue);
+
+		ResponseEntity<ProductResponseRest> productResponse = productServices.searchProducts();
+		List<Product> productList = productResponse.getBody().getProduct().getProducts();
+
+		ProductExcelExporter excelExporter = new ProductExcelExporter(productList);
+
+		excelExporter.export(response);
 	}
 }
